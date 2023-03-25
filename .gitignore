@@ -1,0 +1,10 @@
+**/*.env
+**/.env
+**/.env.*
+**/.m2
+**/.mypy_cache
+**/.venv
+**/.vscode
+**/.idea
+**/venv
+**/.DS_Store
