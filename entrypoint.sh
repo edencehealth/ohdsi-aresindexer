@@ -5,11 +5,6 @@ warn() {
   printf '%s %s\n' "$(date '+%FT%T')" "$*" >&2
 }
 
-die() {
-  warn "FATAL:" "$@"
-  exit 1
-}
-
 main() {
   warn "ENTRYPOINT starting; $(id)"
 
