@@ -1,0 +1,28 @@
+version: '3.5'
+services:
+  ares_indexer:
+    build:
+      context: ares
+    image: edence/ohdsi-aresindexer:beta
+    networks:
+      - ares-net
+    environment:
+      # NOTE - vars below reference a .env file (same dir), with the format:
+      # CDM_SCHEMA=omopcdm
+      # DO NOT quote the values in this .env file
+      CDM_VERSION: "5.3.1"
+      SOURCE_NAME: "${CDM_SOURCE}"
+      CDM_SCHEMA: "${CDM_SCHEMA}"
+      RESULTS_SCHEMA: "${RESULTS_SCHEMA}"
+      DB_DBMS: "postgresql"
+      DB_HOSTNAME: "${TARGET_SERVER}"
+      DB_NAME: "${TARGET_DATABASE}"
+      DB_PORT: 5432
+      DB_USERNAME: "${TARGET_USERNAME}"
+      DB_PASSWORD: "${TARGET_PASSWORD}"
+    volumes:
+      - ./ares_indexer:/webserver_root/ares/data
+
+networks:
+  ares-net:
+    name: ares-net
