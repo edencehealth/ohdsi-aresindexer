@@ -10,6 +10,7 @@ WORKDIR /app
 RUN set -eux; \
   Rscript \
     -e "renv::install('OHDSI/AresIndexer')" \
+    -e "renv::install('OHDSI/Castor')" \
   ;
 
 COPY . .
