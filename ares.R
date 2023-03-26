@@ -100,18 +100,38 @@ if (runMode == "SOURCE") {
        vocabDatabaseSchema = vocabDatabaseSchema,
        outputPath = aresDataRoot
     )
+    out <- tryCatch(
+    {
+        inform("Performing temporal characterization")
+        outputFile <- file.path(datasourceReleaseOutputFolder, "temporal-characterization.csv")
+        Achilles::performTemporalCharacterization(
+           connectionDetails = connectionDetails,
+           cdmDatabaseSchema = cdmDatabaseSchema,
+           resultsDatabaseSchema = resultsDatabaseSchema,
+           outputFile = outputFile
+        )
 
-    inform("Performing temporal characterization")
-    outputFile <- file.path(datasourceReleaseOutputFolder, "temporal-characterization.csv")
-    Achilles::performTemporalCharacterization(
-       connectionDetails = connectionDetails,
-       cdmDatabaseSchema = cdmDatabaseSchema,
-       resultsDatabaseSchema = resultsDatabaseSchema,
-       outputFile = outputFile
+        inform("Augmenting concept files with temporal characterization data")
+        AresIndexer::augmentConceptFiles(releaseFolder = file.path(aresDataRoot, releaseKey))
+    },
+    error = function(cond) {
+        inform("Your data does not support temporal characterization.")
+        warn(
+            paste(
+                "You will need to retrieve the 'temporal-characterization.csv'",
+                "\nfrom the patches directory and place it in your data source release folder",
+                "\nwith the other *.json and *.csv files for proper Ares functionality"
+            )
+        )
+    },
+    warning = function(cond) {
+        message(cond)
+    },
+    finally = {
+        inform("All processes complete! Exiting.")
+    }
     )
 
-    inform("Augmenting concept files with temporal characterization data")
-    AresIndexer::augmentConceptFiles(releaseFolder = file.path(aresDataRoot, releaseKey))
 } else {
     inform("Building network level index for all existing sources")
     sourceFolders <- list.dirs(aresDataRoot,recursive=F)
