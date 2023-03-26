@@ -1,8 +1,8 @@
 version: '3.5'
 services:
   ares_indexer:
-    build:
-      context: .
+    #build:
+    #  context: .
     image: edence/ohdsi-aresindexer:beta
     networks:
       - ares-net

@@ -23,10 +23,12 @@ runMode <- Sys.getenv("RUN_MODE") # Possible Values: SOURCE, NETWORK
 if (runMode %in% c("SOURCE", "NETWORK")) {
     print(
         inform(
-            "Launching AresIndexer Process using RUN_MODE: ",
-            runMode,
-            ". Good Luck!",
-            sep = "'"
+            paste(
+                "Launching AresIndexer Process using RUN_MODE: ",
+                runMode,
+                ". Good Luck!",
+                sep = "'"
+            )
         )
     )
 } else {
