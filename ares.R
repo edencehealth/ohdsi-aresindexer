@@ -14,9 +14,10 @@ resultsDatabaseSchema <- Sys.getenv("RESULTS_SCHEMA")
 vocabDatabaseSchema <- Sys.getenv("CDM_SCHEMA")
 cdmSourceName <- Sys.getenv("CDM_SOURCE")
 dbms <- Sys.getenv("DB_DBMS")
-server  <- paste(Sys.getenv("DB_HOSTNAME"), Sys.getenv("DB_NAME"), sep = "/")
+server  <- Sys.getenv("DB_SERVER")
 user <- Sys.getenv("DB_USERNAME")
 password <- Sys.getenv("DB_PASSWORD")
+port <- Sys.getenv("DB_PORT")
 pathToDriver <- "/usr/local/lib/DatabaseConnectorJars"
 runMode <- Sys.getenv("RUN_MODE") # Possible Values: SOURCE, NETWORK
 
@@ -53,6 +54,7 @@ if (runMode == "SOURCE") {
        server   = server,
        user     = user,
        password = password,
+       port = port,
        pathToDriver = pathToDriver
     )
 

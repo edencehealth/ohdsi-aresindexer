@@ -1,11 +1,11 @@
 version: '3.5'
 services:
   ares_indexer:
-    #build:
-    #  context: .
-    image: edence/ohdsi-aresindexer:beta
+    build:
+      context: .
+#    image: edence/ohdsi-aresindexer:beta
     networks:
-      - ares-net
+      - explorer-net
     environment:
       # NOTE - vars below reference a '.env' file (same dir), with the format:
       # -------------------
@@ -13,14 +13,15 @@ services:
       # RESULTS_SCHEMA=results
       # -------------------
       # DO NOT quote the values in this .env file
-      CDM_VERSION: "5.3.1"
+      CDM_VERSION: "5.4"
       SOURCE_NAME: "${CDM_SOURCE}"
       CDM_SCHEMA: "${CDM_SCHEMA}"
+      CDM_SOURCE: "${CDM_SOURCE}"
       RESULTS_SCHEMA: "${RESULTS_SCHEMA}"
       DB_DBMS: "postgresql"
-      DB_HOSTNAME: "${TARGET_SERVER}"
+      DB_SERVER: "${TARGET_SERVER}"
       DB_NAME: "${TARGET_DATABASE}"
-      DB_PORT: 5432
+      DB_PORT: "${TARGET_DB_PORT}"
       DB_USERNAME: "${TARGET_USERNAME}"
       DB_PASSWORD: "${TARGET_PASSWORD}"
       RUN_MODE: "SOURCE" # MUST BE IN: ["SOURCE", "NETWORK"]
@@ -28,5 +29,5 @@ services:
       - ./ares_indexer:/webserver_root/ares/data
 
 networks:
-  ares-net:
-    name: ares-net
+  explorer-net:
+    name: explorer-net
