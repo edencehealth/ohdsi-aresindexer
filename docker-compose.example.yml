@@ -3,6 +3,7 @@ services:
   ares_indexer:
     build:
       context: .
+    image: ares_indexer
 #    image: edence/ohdsi-aresindexer:beta
     networks:
       - explorer-net
