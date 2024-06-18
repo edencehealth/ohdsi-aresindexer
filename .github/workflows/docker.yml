@@ -5,7 +5,7 @@ name: Docker
     branches:
       - main
     tags:
-      - '*.*.*'
+      - "*.*.*"
 
 jobs:
   # https://github.com/edencehealth/workflows
