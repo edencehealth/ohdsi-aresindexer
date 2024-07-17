@@ -1,10 +1,12 @@
 **/*.env
+**/.DS_Store
 **/.env
 **/.env.*
+**/.idea
 **/.m2
 **/.mypy_cache
 **/.venv
 **/.vscode
-**/.idea
 **/venv
-**/.DS_Store
+.Rhistory
+.Rproj.user

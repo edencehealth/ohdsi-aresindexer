@@ -6,7 +6,7 @@ warn() {
 }
 
 main() {
-  warn "ENTRYPOINT starting; $(id)"
+  warn "ENTRYPOINT starting; $(id) in $(pwd)"
 
   # normally this will only be one directory
   export R_LIBS="${R_LIBS:-}"
