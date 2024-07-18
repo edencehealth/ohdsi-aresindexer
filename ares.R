@@ -27,22 +27,24 @@ password <- getcfg("DB_PASSWORD", "postgres", "the password to use when authenti
 pathToDriver <- getcfg("PATH_TO_DRIVER", "/usr/local/lib/DatabaseConnectorJars", "the path to the DatabaseConnectorJars directory")
 
 runMode <- getcfg("RUN_MODE", "SOURCE", "mode of operation; possible values: SOURCE, NETWORK")
+
 achillesAnalysisIds <- getcfg("ACHILLES_ANALYSIS_IDS", NULL, "optional comma-separated list of Achilles analysisIds for which results will be generated (defaults to all)")
 achillesExcludeAnalysisIds <- getcfg("ACHILLES_EXCLUDE_ANALYSIS_IDS", NULL, "optional comma-separated list containing the set of Achilles analyses to exclude")
-achillesSmallCellCount <- getcfg("ACHILLES_SMALL_CELL_COUNT", 5, "To avoid patient identification, cells with small counts (<= smallCellCount) are deleted. Set to 0 for complete summary without small cell count restrictions. (defaults to 5)")
-achillesNumThreads <- getcfg("ACHILLES_NUM_THREADS", 1, "The number of threads to use to run Achilles in parallel. Default is 1 thread.")
+achillesSmallCellCount <- as.integer(getcfg("ACHILLES_SMALL_CELL_COUNT", 5, "To avoid patient identification, cells with small counts (<= smallCellCount) are deleted. Set to 0 for complete summary without small cell count restrictions. (defaults to 5)"))
+achillesNumThreads <- as.integer(getcfg("ACHILLES_NUM_THREADS", 1, "The number of threads to use to run Achilles in parallel. Default is 1 thread."))
 achillesOutputFolder <- getcfg("ACHILLES_OUTPUT_FOLDER", "output", "Path to store logs and SQL files")
 
-dqdNumThreads <- getcfg("DQD_NUM_THREADS", 1, "The number of concurrent threads to use to execute the queries Default is 1 thread.")
+dqdNumThreads <- as.integer(getcfg("DQD_NUM_THREADS", 1, "The number of concurrent threads to use to execute the queries Default is 1 thread."))
 dqdOutputFile <- getcfg("DQD_OUTPUT_FILE", "dq-result.json", "File to write DQD results JSON object")
 dqdVerboseMode <- getcfg("DQD_VERBOSE_MODE", FALSE, "determines if the console will show all DQD execution steps")
-
 dqdCheckLevels <- parseListArg(getcfg("DQD_CHECK_LEVELS", "TABLE,FIELD,CONCEPT", "comma-separated list of DQ check levels to execute. Default is all 3: TABLE,FIELD,CONCEPT)"))
 dqdCheckNames <- getcfg("DQD_CHECK_NAMES", NULL,"(OPTIONAL) comma-separated list of check names to execute")
 dqdTablesToExclude <- parseListArg(getcfg("DQD_TABLES_TO_EXCLUDE", "CONCEPT,VOCABULARY,CONCEPT_ANCESTOR,CONCEPT_RELATIONSHIP,CONCEPT_CLASS,CONCEPT_SYNONYM,RELATIONSHIP,DOMAIN", "CDM tables to exclude from the execution"))
 dqdTableCheckThresholdLoc <- getcfg("DQD_TABLE_CHECK_THRESHOLD_LOC", "default", "location of the threshold file for evaluating the table checks. If not specified the default thresholds will be applied")
 dqdFieldCheckThresholdLoc <- getcfg("DQD_FIELD_CHECK_THRESHOLD_LOC", "default", "location of the threshold file for evaluating the field checks. If not specified the default thresholds will be applied")
 dqdConceptCheckThresholdLoc <- getcfg("DQD_CONCEPT_CHECK_THRESHOLD_LOC", "default", "location of the threshold file for evaluating the concept checks. If not specified the default thresholds will be applied")
+
+aresConceptFormat <- getcfg("ARES_CONCEPT_FORMAT", "json", "Storage format of concept data: 'json' or 'duckdb'; defaults to JSON")
 
 if (runMode %in% c("SOURCE", "NETWORK")) {
   message(sprintf("starting in %s mode", runMode))
@@ -165,14 +167,14 @@ if (runMode == "SOURCE") {
       )
 
       # https://ohdsi.github.io/AresIndexer/reference/augmentConceptFiles.html
-      message("AresIndexer::augmentConceptFiles; (Augmenting concept files with temporal characterization data)")
-      AresIndexer::augmentConceptFiles(releaseFolder = outputFolder)
+      message("AresIndexer::augmentConceptFiles (Augmenting concept files with temporal characterization data)")
+      AresIndexer::augmentConceptFiles(releaseFolder = outputFolder, format=aresConceptFormat)
     },
     error = function(cond) {
       warning(
-          "Your data does not support temporal characterization.\n",
-          cond, "\n",
-          "You will need to retrieve the 'temporal-characterization.csv'\n",
+          "Achilles::performTemporalCharacterization ERROR: ", cond$message, "\n",
+          "Your data may not support temporal characterization.\n",
+          "You may need to retrieve the 'temporal-characterization.csv'\n",
           "from the assets directory and place it in your data source release folder\n",
           "with the other *.json and *.csv files for proper Ares functionality\n"
         )
@@ -209,18 +211,20 @@ AresIndexer::buildDataQualityIndex(
 tryCatch(
   expr = {
     # https://ohdsi.github.io/AresIndexer/reference/buildNetworkUnmappedSourceCodeIndex.html
-    message("AresIndexer::buildNetworkUnmappedSourceCodeIndex - Creating network-level unmapped code overview")
+    message("AresIndexer::buildNetworkUnmappedSourceCodeIndex")
     AresIndexer::buildNetworkUnmappedSourceCodeIndex(
       sourceFolders = sourceFolders,
       outputFolder = aresDataRoot
     )
   },
   error = function(cond) {
+    # as of 18-Jul-2024 there is a known error here:
+    #   https://github.com/OHDSI/AresIndexer/pull/49#issuecomment-2236674142
     warning(
-      "There are no unmapped codes across your network. Congratulations!\n"
-      "You will need to retrieve the 'network-unmapped-source-codes.csv'\n",
+      "AresIndexer::buildNetworkUnmappedSourceCodeIndex ERROR: ", cond$message, "\n",
+      "You may need to retrieve the 'network-unmapped-source-codes.csv'\n",
       "from the assets directory and place it in your data root folder\n",
-      "with the other network-*.csv files for proper Ares functionality\n"
+      "with the other network-*.csv files for proper Ares functionality\n",
     )
   },
   warning = function(cond) {
