@@ -8,7 +8,7 @@ RUN /patches/run.sh
 
 RUN Rscript \
     -e "renv::install('OHDSI/Achilles@develop')" \
-    -e "renv::install('OHDSI/AresIndexer')" \
+    -e "renv::install('OHDSI/AresIndexer@develop')" \
     -e "renv::install('OHDSI/Castor')" \
   ;
 
