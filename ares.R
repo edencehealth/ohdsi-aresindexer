@@ -2,10 +2,13 @@
 # Wrapper around OHDSI Ares(Indexer) to generate output needed for Ares Visualization
 # edenceHealth NV <info@edence.health>
 
+# fixme: temp workaround
+.libPaths(c(.libPaths(), "/usr/local/lib/R/site-library/"))
+
 source("wrapper_functions.R")
 wrapper_version_str <- "1.1"
 
-aresDataRoot <- getcfg("ARES_DATA_ROOT", "/webserver_root/ares/data", "base directory for ares data")
+aresDataRoot <- getcfg("ARES_DATA_ROOT", "/output/ares", "base directory for ares data")
 cdmVersion <- getcfg("CDM_VERSION", "5.4", "OMOP CDM version number; use only major and minor version e.g. '5.3' or '5.4'")
 
 cdmDatabaseSchema <- getcfg("CDM_SCHEMA", "omopcdm", "name of database schema where CDM data is located")
@@ -94,13 +97,13 @@ if (runMode == "SOURCE") {
     verboseMode = TRUE,
     optimizeAtlasCache = FALSE,
     defaultAnalysesOnly = TRUE,
-    updateGivenAnalysesOnly = FALSE,
+    updateGivenAnalysesOnly = FALSE
   )
   if (!is.null(achillesAnalysisIds) && achillesAnalysisIds != "") {
-    achillesArgs <- append(achillesArgs, analysisIds=parseListArg(achillesAnalysisIds))
+    achillesArgs <- c(achillesArgs, list(analysisIds=parseListArg(achillesAnalysisIds)))
   }
   if (!is.null(achillesExcludeAnalysisIds) && achillesExcludeAnalysisIds != "") {
-    achillesArgs <- append(achillesArgs, excludeAnalysisIds=parseListArg(achillesExcludeAnalysisIds))
+    achillesArgs <- c(achillesArgs, list(excludeAnalysisIds=parseListArg(achillesExcludeAnalysisIds)))
   }
   message("Achilles::achilles")
   do.call(Achilles::achilles, achillesArgs)
@@ -133,14 +136,14 @@ if (runMode == "SOURCE") {
     conceptCheckThresholdLoc = dqdConceptCheckThresholdLoc
   )
   if (!is.null(dqdCheckNames) && dqdCheckNames != "") {
-    dqdArgs <- append(dqdArgs, checkNames=parseListArg(dqdCheckNames))
+    dqdArgs <- c(dqdArgs, list(checkNames=parseListArg(dqdCheckNames)))
   }
   message(sprintf("DataQualityDashboard::executeDqChecks"))
   dqResults <- do.call(DataQualityDashboard::executeDqChecks, dqdArgs)
 
-  # https://ohdsi.github.io/Achilles/reference/exportAO.html
-  message("Achilles::exportAO")
-  Achilles::exportAO(
+  # https://ohdsi.github.io/Achilles/reference/exportToAres.html
+  message("Achilles::exportToAres")
+  Achilles::exportToAres(
     connectionDetails = cnxn,
     cdmDatabaseSchema = cdmDatabaseSchema,
     resultsDatabaseSchema = resultsDatabaseSchema,
@@ -182,7 +185,8 @@ if (runMode == "SOURCE") {
     }
   )
 
-  quit(status=0)
+  # experimenting with fall-thru
+  # quit(status=0)
 }
 
 # Network mode
