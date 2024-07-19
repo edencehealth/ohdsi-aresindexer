@@ -1,5 +1,5 @@
 #!/usr/bin/Rscript
-# Wrapper around OHDSI Ares(Indexer) to generate output needed for Ares Visualization
+# Wrapper around OHDSI AresIndexer which generates output for the Ares UI
 # edenceHealth NV <info@edence.health>
 
 # fixme: temp workaround
@@ -38,7 +38,7 @@ dqdNumThreads <- as.integer(getcfg("DQD_NUM_THREADS", 1, "The number of concurre
 dqdOutputFile <- getcfg("DQD_OUTPUT_FILE", "dq-result.json", "File to write DQD results JSON object")
 dqdVerboseMode <- getcfg("DQD_VERBOSE_MODE", FALSE, "determines if the console will show all DQD execution steps")
 dqdCheckLevels <- parseListArg(getcfg("DQD_CHECK_LEVELS", "TABLE,FIELD,CONCEPT", "comma-separated list of DQ check levels to execute. Default is all 3: TABLE,FIELD,CONCEPT)"))
-dqdCheckNames <- getcfg("DQD_CHECK_NAMES", NULL,"(OPTIONAL) comma-separated list of check names to execute")
+dqdCheckNames <- getcfg("DQD_CHECK_NAMES", NULL, "(OPTIONAL) comma-separated list of check names to execute")
 dqdTablesToExclude <- parseListArg(getcfg("DQD_TABLES_TO_EXCLUDE", "CONCEPT,VOCABULARY,CONCEPT_ANCESTOR,CONCEPT_RELATIONSHIP,CONCEPT_CLASS,CONCEPT_SYNONYM,RELATIONSHIP,DOMAIN", "CDM tables to exclude from the execution"))
 dqdTableCheckThresholdLoc <- getcfg("DQD_TABLE_CHECK_THRESHOLD_LOC", "default", "location of the threshold file for evaluating the table checks. If not specified the default thresholds will be applied")
 dqdFieldCheckThresholdLoc <- getcfg("DQD_FIELD_CHECK_THRESHOLD_LOC", "default", "location of the threshold file for evaluating the field checks. If not specified the default thresholds will be applied")
@@ -66,11 +66,11 @@ if (runMode == "SOURCE") {
     server <- hostName
   }
   cnxn <- DatabaseConnector::createConnectionDetails(
-    dbms     = dbms,
-    user     = user,
+    dbms = dbms,
+    user = user,
     password = password,
-    server   = server,
-    port     = dbPort,
+    server = server,
+    port = dbPort,
     pathToDriver = pathToDriver
   )
 
@@ -79,7 +79,7 @@ if (runMode == "SOURCE") {
   message(sprintf("output folder: %s", outputFolder))
 
   # https://ohdsi.github.io/Achilles/reference/achilles.html
-  achillesArgs = list(
+  achillesArgs <- list(
     connectionDetails = cnxn,
     cdmDatabaseSchema = cdmDatabaseSchema,
     resultsDatabaseSchema = resultsDatabaseSchema,
@@ -102,17 +102,17 @@ if (runMode == "SOURCE") {
     updateGivenAnalysesOnly = FALSE
   )
   if (!is.null(achillesAnalysisIds) && achillesAnalysisIds != "") {
-    achillesArgs <- c(achillesArgs, list(analysisIds=parseListArg(achillesAnalysisIds)))
+    achillesArgs <- c(achillesArgs, list(analysisIds = parseListArg(achillesAnalysisIds)))
   }
   if (!is.null(achillesExcludeAnalysisIds) && achillesExcludeAnalysisIds != "") {
-    achillesArgs <- c(achillesArgs, list(excludeAnalysisIds=parseListArg(achillesExcludeAnalysisIds)))
+    achillesArgs <- c(achillesArgs, list(excludeAnalysisIds = parseListArg(achillesExcludeAnalysisIds)))
   }
   message("Achilles::achilles")
   do.call(Achilles::achilles, achillesArgs)
 
 
   # https://ohdsi.github.io/DataQualityDashboard/reference/executeDqChecks.html
-  dqdArgs = list(
+  dqdArgs <- list(
     connectionDetails = cnxn,
     cdmDatabaseSchema = cdmDatabaseSchema,
     resultsDatabaseSchema = resultsDatabaseSchema,
@@ -138,7 +138,7 @@ if (runMode == "SOURCE") {
     conceptCheckThresholdLoc = dqdConceptCheckThresholdLoc
   )
   if (!is.null(dqdCheckNames) && dqdCheckNames != "") {
-    dqdArgs <- c(dqdArgs, list(checkNames=parseListArg(dqdCheckNames)))
+    dqdArgs <- c(dqdArgs, list(checkNames = parseListArg(dqdCheckNames)))
   }
   message(sprintf("DataQualityDashboard::executeDqChecks"))
   dqResults <- do.call(DataQualityDashboard::executeDqChecks, dqdArgs)
@@ -168,16 +168,16 @@ if (runMode == "SOURCE") {
 
       # https://ohdsi.github.io/AresIndexer/reference/augmentConceptFiles.html
       message("AresIndexer::augmentConceptFiles (Augmenting concept files with temporal characterization data)")
-      AresIndexer::augmentConceptFiles(releaseFolder = outputFolder, format=aresConceptFormat)
+      AresIndexer::augmentConceptFiles(releaseFolder = outputFolder, format = aresConceptFormat)
     },
     error = function(cond) {
       warning(
-          "Achilles::performTemporalCharacterization ERROR: ", cond$message, "\n",
-          "Your data may not support temporal characterization.\n",
-          "You may need to retrieve the 'temporal-characterization.csv'\n",
-          "from the assets directory and place it in your data source release folder\n",
-          "with the other *.json and *.csv files for proper Ares functionality\n"
-        )
+        "Achilles::performTemporalCharacterization ERROR: ", cond$message, "\n",
+        "Your data may not support temporal characterization.\n",
+        "You may need to retrieve the 'temporal-characterization.csv'\n",
+        "from the assets directory and place it in your data source release folder\n",
+        "with the other *.json and *.csv files for proper Ares functionality\n"
+      )
     },
     warning = function(cond) {
       message(cond)
