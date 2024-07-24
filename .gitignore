@@ -10,3 +10,4 @@
 **/venv
 .Rhistory
 .Rproj.user
+mktable.sh
