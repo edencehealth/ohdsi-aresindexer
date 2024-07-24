@@ -1,11 +1,6 @@
-version: '3.5'
 services:
-  ares_indexer:
-    #build:
-    #  context: .
-    image: edence/ohdsi-aresindexer:beta
-    networks:
-      - ares-net
+  aresindexer:
+    image: edence/ohdsi-aresindexer
     environment:
       # NOTE - vars below reference a '.env' file (same dir), with the format:
       # -------------------
@@ -25,8 +20,4 @@ services:
       DB_PASSWORD: "${TARGET_PASSWORD}"
       RUN_MODE: "SOURCE" # MUST BE IN: ["SOURCE", "NETWORK"]
     volumes:
-      - ./ares_indexer:/webserver_root/ares/data
-
-networks:
-  ares-net:
-    name: ares-net
+      - ./data:/output/ares/data
