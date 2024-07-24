@@ -1,18 +1,18 @@
-from edence/ohdsi-achilles
+FROM edence/ohdsi-achilles
 
 USER root
-
-RUN cd /app
-
 WORKDIR /app
 
+COPY patches/. /patches/
+RUN /patches/run.sh
 
-RUN set -eux; \
-  Rscript \
-    -e "renv::install('OHDSI/AresIndexer')" \
+RUN Rscript \
+    -e "renv::install('OHDSI/Achilles@develop')" \
+    -e "renv::install('OHDSI/AresIndexer@develop')" \
     -e "renv::install('OHDSI/Castor')" \
   ;
 
-COPY . .
+COPY assets assets/
+COPY ares.R wrapper_functions.R entrypoint.sh ./
 
-ENTRYPOINT ["bash", "/app/entrypoint.sh"]
+ENTRYPOINT ["/app/entrypoint.sh"]

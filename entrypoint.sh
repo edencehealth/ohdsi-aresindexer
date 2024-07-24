@@ -6,11 +6,11 @@ warn() {
 }
 
 main() {
-  warn "ENTRYPOINT starting; $(id)"
+  warn "ENTRYPOINT starting; $(id) in $(pwd)"
 
   # normally this will only be one directory
   export R_LIBS="${R_LIBS:-}"
-  for dir in /app/renv/library/R-*/*/; do
+  for dir in /app/renv/library/R-*/*/ /usr/local/lib/R/site-library/; do
     if [ -n "$R_LIBS" ]; then
       R_LIBS="${R_LIBS}:${dir}"
     else
