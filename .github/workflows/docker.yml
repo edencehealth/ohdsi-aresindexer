@@ -13,7 +13,8 @@ name: Docker
 jobs:
   # https://github.com/edencehealth/workflows
   docker:
-    uses: edencehealth/workflows/.github/workflows/dockerimage.yml@distributed-builders
+    uses: edencehealth/workflows/.github/workflows/dockerimage.yml@v1
     with:
       container_name: ohdsi-aresindexer
+      push: true
     secrets: inherit
